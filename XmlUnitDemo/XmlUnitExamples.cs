@@ -47,7 +47,13 @@ namespace XmlUnitDemo
                     "<root><irrelevant>irrelevant value</irrelevant><relevant>relevant value</relevant></root>"))
                 .WithTest(Input.FromString(
                     "<root><irrelevant>other irrelevant value</irrelevant><relevant>relevant value</relevant></root>"))
-                .WithNodeFilter(n => n.Name != "irrelevant"));
+                .WithNodeFilter(EverythingExcept(n => n.Name == "irrelevant"))
+                );
+        }
+
+        private Predicate<XmlNode> EverythingExcept(Func<XmlNode, bool> predicate)
+        {
+            return node => !predicate.Invoke(node);
         }
 
         [Fact]
@@ -58,7 +64,7 @@ namespace XmlUnitDemo
                     "<root relevant='relevant'/>"))
                 .WithTest(Input.FromString(
                     "<root relevant='relevant' irrelevant='different' />"))
-                .WithAttributeFilter(a => a.Name != "irrelevant"));
+                .WithAttributeFilter(EverythingExcept(a => a.Name == "irrelevant")));
         }
 
         [Fact]
@@ -71,11 +77,6 @@ namespace XmlUnitDemo
                     "<root><irrelevant>irrelevant2</irrelevant><relevant>relevant</relevant></root>"))
                 .WithNodeFilter(EverythingExcept(n => n.ParentNode?.Name == "root" && n.Name == "irrelevant"))
             );
-        }
-
-        private Predicate<XmlNode> EverythingExcept(Func<XmlNode, bool> predicate)
-        {
-            return node => !predicate.Invoke(node);
         }
     }
 }
